@@ -40,6 +40,50 @@ An end-to-end question-answering chatbot that grounds responses in your own docu
 - **Parsing Libraries:** `pdfplumber`, `python-docx`, `markdown`, `pypdf`
 - **Utilities:** `python-dotenv`, `pydantic`, `typer` for CLI tooling, `pytest`
 
+## Learning Roadmap
+### 1. Python Foundations
+- Control flow (`if`, `for`, `while`), functions, list/dict comprehensions
+- Working with packages: virtual environments, `pip`, project structure
+- File I/O for reading documents, handling encodings, basic error handling
+- Standard library modules useful for this project (`pathlib`, `json`, `logging`, `argparse`/`typer`)
+
+### 2. Environment & Tooling
+- Git basics (branching, committing) and GitHub workflow
+- Using `.env` files and environment variables securely
+- Dependency management with `requirements.txt` or `pip-tools`
+
+### 3. Semantic Search & Embeddings
+- Concept of vector embeddings and cosine similarity
+- OpenAI embedding endpoints and rate limits
+- Vector stores (FAISS, Chroma, pgvector) fundamentals
+- Chunking strategies: window size, overlap, metadata tracking
+
+### 4. Large Language Models & Prompting
+- Difference between system, user, assistant messages
+- Techniques for grounding answers and avoiding hallucinations
+- Cost management: token budgeting, model choice trade-offs
+- Basic prompt engineering patterns (instruction following, citations)
+
+### 5. Document Ingestion
+- Parsing PDFs with `pdfplumber`/`pypdf` and handling edge cases
+- Reading DOCX, Markdown, and plain text files
+- Text cleaning: removing headers/footers, normalizing whitespace, token estimation
+
+### 6. Web Framework Basics
+- Streamlit layout primitives or Flask routing/templates (choose your preferred path)
+- Handling form submissions/uploads safely
+- Rendering chat interfaces and streaming responses
+
+### 7. Deployment & Operations
+- Packaging the app with Docker (optional) or preparing for Render/Railway
+- Managing secrets in production environments
+- Monitoring logs, handling retries, and setting sensible timeouts
+
+### 8. Responsible & Reliable AI
+- Reading OpenAI usage policies and moderation guidelines
+- Implementing guardrails, refusal behavior, and user feedback loops
+- Evaluating QA quality with manual or automated checks
+
 ## Repository Structure (proposed)
 ```
 .
@@ -143,4 +187,3 @@ Choose a license that matches your sharing goals (MIT, Apache-2.0, etc.). Update
 - [FAISS Documentation](https://faiss.ai/index.html)
 - [Streamlit Docs](https://docs.streamlit.io/)
 - [Flask Quickstart](https://flask.palletsprojects.com/en/latest/quickstart/)
-
