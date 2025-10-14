@@ -40,6 +40,7 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
 - Re-run `scripts/ingest.py` whenever documents change.
 - In the Streamlit sidebar, configure embedding/chat models and the number of context chunks.
 - Answers cite their source files. When context is insufficient, the model is instructed to acknowledge uncertainty.
+- If no relevant chunks are retrieved from the vector store, the assistant explicitly replies that it cannot answer yet.
 
 ## Project Structure
 ```

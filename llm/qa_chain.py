@@ -29,12 +29,13 @@ class QaChain:
         embedder: OpenAIEmbedder,
         chat_model: str = "gpt-4o-mini",
         system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+        client: OpenAI | None = None,
     ) -> None:
         self.vector_store = vector_store
         self.embedder = embedder
         self.chat_model = chat_model
         self.system_prompt = system_prompt
-        self.client = OpenAI()
+        self.client = client or OpenAI()
 
     def _format_context(self, sources: Sequence[tuple[float, StoreRecord]]) -> str:
         formatted = []
@@ -46,7 +47,14 @@ class QaChain:
 
     def ask(self, question: str, top_k: int = 3) -> QaResult:
         query_embedding = self.embedder.embed_query(question)
+        if not query_embedding:
+            raise RuntimeError("Failed to generate embedding for the supplied question.")
         matches = self.vector_store.search(query_embedding, top_k=top_k)
+        if not matches:
+            return QaResult(
+                answer="I do not know. No relevant context chunks were retrieved from the vector store.",
+                sources=[],
+            )
         context_block = self._format_context(matches)
 
         user_prompt = (
