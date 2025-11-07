@@ -176,7 +176,13 @@ def run() -> None:
         else:
             with st.chat_message("assistant"):
                 try:
-                    result = chain.ask(prompt, top_k=top_k)
+                    # History should include all messages up to the current one.
+                    # The last message is the current user prompt, which is passed separately.
+                    chat_history = [
+                        {"role": msg["role"], "content": msg["content"]}
+                        for msg in st.session_state["messages"][:-1]
+                    ]
+                    result = chain.ask(prompt, chat_history=chat_history, top_k=top_k)
                     st.markdown(result.answer)
                     _render_sources(result.sources)
                     st.session_state["messages"].append(
