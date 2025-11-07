@@ -11,8 +11,9 @@ from retrieval.store import LocalVectorStore, StoreRecord
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are a helpful teaching assistant who answers questions using only the provided "
-    "context. Cite sources in parentheses using the metadata 'name' when relevant. If "
-    "the answer is not in the context, say you do not know."
+    "context. Use the conversation history to answer follow-up questions. Cite sources "
+    "in parentheses using the metadata 'name' when relevant. If the answer is not in the "
+    "context, say you do not know."
 )
 
 
@@ -44,7 +45,10 @@ class QaChain:
             )
         return "\n\n".join(formatted)
 
-    def ask(self, question: str, top_k: int = 3) -> QaResult:
+    def ask(
+        self, question: str, chat_history: List[dict] | None = None, top_k: int = 3
+    ) -> QaResult:
+        chat_history = chat_history or []
         query_embedding = self.embedder.embed_query(question)
         matches = self.vector_store.search(query_embedding, top_k=top_k)
         context_block = self._format_context(matches)
@@ -54,12 +58,15 @@ class QaChain:
             "\n\nContext:\n" + context_block + f"\n\nQuestion: {question}\nAnswer:"
         )
 
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            *chat_history,
+            {"role": "user", "content": user_prompt},
+        ]
+
         response = self.client.chat.completions.create(
             model=self.chat_model,
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
+            messages=messages,
             temperature=0.2,
         )
         answer = response.choices[0].message.content.strip()
