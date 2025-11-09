@@ -66,10 +66,13 @@ def process_uploaded_files(
         return store
 
 
-def _render_sources(sources) -> None:
+def _render_sources(sources, highlighted_sources: List[str] | None = None) -> None:
+    if highlighted_sources is None:
+        highlighted_sources = [record.text for _, record in sources]
+
     for idx, (score, record) in enumerate(sources, 1):
         with st.expander(f"Source {idx} | score={score:.2f} | {record.metadata.get('source', 'unknown')}"):
-            st.markdown(record.text)
+            st.markdown(highlighted_sources[idx - 1], unsafe_allow_html=True)
 
 
 def run() -> None:
@@ -102,6 +105,7 @@ def run() -> None:
     )
     top_k = sidebar.slider("Top K context chunks", min_value=1, max_value=10, value=3)
     rerank = sidebar.checkbox("Enable Re-ranking", value=False)
+    highlight = sidebar.checkbox("Enable Highlighting", value=False)
 
     vector_path = Path(vector_path_str)
     chain: Optional[QaChain] = None
@@ -165,7 +169,7 @@ def run() -> None:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message["role"] == "assistant" and message.get("sources"):
-                _render_sources(message["sources"])
+                _render_sources(message["sources"], message.get("highlighted_sources"))
 
     if prompt := st.chat_input("Ask a question about your documents"):
         st.session_state["messages"].append({"role": "user", "content": prompt})
@@ -186,13 +190,22 @@ def run() -> None:
                     result = chain.ask(
                         prompt, chat_history=chat_history, top_k=top_k, rerank=rerank
                     )
-                    st.markdown(result.answer)
-                    _render_sources(result.sources)
+
+                    # Stream the response
+                    full_answer = st.write_stream(result.answer_stream)
+
+                    # Compute and render highlights if enabled
+                    if highlight:
+                        with st.spinner("Highlighting sources..."):
+                            result.compute_highlights()
+                    _render_sources(result.sources, result.highlighted_sources)
+
                     st.session_state["messages"].append(
                         {
                             "role": "assistant",
-                            "content": result.answer,
+                            "content": full_answer,
                             "sources": result.sources,
+                            "highlighted_sources": result.highlighted_sources,
                         }
                     )
                 except Exception as exc:  # pragma: no cover - UI feedback
