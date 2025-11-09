@@ -1,6 +1,7 @@
 """High-level orchestration for retrieval-augmented QA."""
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import List, Sequence
 
@@ -45,13 +46,67 @@ class QaChain:
             )
         return "\n\n".join(formatted)
 
+    def _rerank_documents(
+        self, question: str, sources: List[tuple[float, StoreRecord]]
+    ) -> List[tuple[float, StoreRecord]]:
+        if not sources:
+            return []
+
+        # Prepare the documents for the re-ranking prompt
+        doc_texts = [
+            f"ID: {idx}\nText: {record.text}" for idx, (_, record) in enumerate(sources)
+        ]
+        docs_str = "\n\n".join(doc_texts)
+
+        # Create a prompt for the LLM to score the documents
+        prompt = (
+            f"Given the question '{question}', please score the following documents for relevance "
+            "from 1 (not relevant) to 10 (highly relevant). Respond with a JSON object where "
+            "keys are the document IDs and values are their scores.\n\n"
+            f"Documents:\n{docs_str}"
+        )
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.chat_model,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+            )
+            scores = json.loads(response.choices[0].message.content)
+
+            # Sort the original sources based on the new scores
+            reranked_sources = sorted(
+                sources,
+                key=lambda item: scores.get(str(sources.index(item)), 0),
+                reverse=True,
+            )
+            return reranked_sources
+        except (json.JSONDecodeError, KeyError):
+            # Fallback to original order if re-ranking fails
+            return sources
+
     def ask(
-        self, question: str, chat_history: List[dict] | None = None, top_k: int = 3
+        self,
+        question: str,
+        chat_history: List[dict] | None = None,
+        top_k: int = 3,
+        rerank: bool = False,
     ) -> QaResult:
         chat_history = chat_history or []
         query_embedding = self.embedder.embed_query(question)
-        matches = self.vector_store.search(query_embedding, top_k=top_k)
-        context_block = self._format_context(matches)
+
+        # Retrieve a larger pool of documents if re-ranking is enabled
+        initial_k = top_k * 3 if rerank else top_k
+        matches = self.vector_store.search(query_embedding, top_k=initial_k)
+
+        # Re-rank if enabled
+        if rerank:
+            matches = self._rerank_documents(question, list(matches))
+
+        # Select the top_k documents after potential re-ranking
+        final_matches = matches[:top_k]
+        context_block = self._format_context(final_matches)
 
         user_prompt = (
             "You must ground every answer in the provided sources."
@@ -70,4 +125,4 @@ class QaChain:
             temperature=0.2,
         )
         answer = response.choices[0].message.content.strip()
-        return QaResult(answer=answer, sources=list(matches))
+        return QaResult(answer=answer, sources=list(final_matches))
