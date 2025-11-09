@@ -101,6 +101,7 @@ def run() -> None:
         "Chat model", value=st.session_state.get("chat_model", "gpt-4o-mini")
     )
     top_k = sidebar.slider("Top K context chunks", min_value=1, max_value=10, value=3)
+    rerank = sidebar.checkbox("Enable Re-ranking", value=False)
 
     vector_path = Path(vector_path_str)
     chain: Optional[QaChain] = None
@@ -182,7 +183,9 @@ def run() -> None:
                         {"role": msg["role"], "content": msg["content"]}
                         for msg in st.session_state["messages"][:-1]
                     ]
-                    result = chain.ask(prompt, chat_history=chat_history, top_k=top_k)
+                    result = chain.ask(
+                        prompt, chat_history=chat_history, top_k=top_k, rerank=rerank
+                    )
                     st.markdown(result.answer)
                     _render_sources(result.sources)
                     st.session_state["messages"].append(
