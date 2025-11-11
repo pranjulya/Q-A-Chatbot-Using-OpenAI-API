@@ -99,3 +99,4 @@ Released under the MIT License. See `LICENSE` for details.
 - [OpenAI Cookbook](https://github.com/openai/openai-cookbook)
 - [Streamlit Documentation](https://docs.streamlit.io/)
 - [Typer Documentation](https://typer.tiangolo.com/)
+- [Core Documentation](https://openai.com)
