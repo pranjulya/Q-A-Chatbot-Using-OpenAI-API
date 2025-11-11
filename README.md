@@ -69,6 +69,7 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
 └── requirements.txt
 ```
 
+
 ## Learning Roadmap
 The repository doubles as a companion curriculum. Suggested topics for students:
 
