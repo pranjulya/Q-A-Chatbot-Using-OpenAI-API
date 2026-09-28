@@ -22,23 +22,25 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
 2. **Configure environment variables**
    ```bash
    cp configs/settings.example.env .env
-   # edit .env with your OpenAI API key and (optionally) custom model names
+   # edit .env and set OPENAI_API_KEY (required). Model names in that file are unused — pick models in the Streamlit sidebar or via --embedding-model on ingest.
    ```
 3. **Load documents and build the vector store**
    ```bash
    mkdir -p data/raw
    # add .txt/.md/.pdf/.docx files to data/raw
-   python scripts/ingest.py data/raw --output data/processed/index.json
+   # Run from the repo root so local packages import cleanly
+   python -m scripts.ingest run data/raw --output data/processed/index.json
    ```
 4. **Launch the Streamlit app**
    ```bash
-   streamlit run app/main.py
+   PYTHONPATH=. python -m streamlit run app/main.py
    ```
 
 ## Usage
-- Point the chatbot at a folder of course notes, handbooks, or knowledge base articles.
-- Re-run `scripts/ingest.py` whenever documents change.
-- In the Streamlit sidebar, configure embedding/chat models and the number of context chunks.
+- Point the chatbot at a folder of course notes, handbooks, or knowledge base articles, then ingest them with `python -m scripts.ingest run …`.
+- Or skip the CLI: use **Upload documents** in the Streamlit sidebar to process files in memory for the current session.
+- Re-run ingest whenever on-disk documents change.
+- In the Streamlit sidebar, configure embedding/chat models, the number of context chunks, and optionally **Enable Re-ranking**.
 - Answers cite their source files. When context is insufficient, the model is instructed to acknowledge uncertainty.
 
 ## Project Structure
@@ -82,9 +84,9 @@ The repository doubles as a companion curriculum. Suggested topics for students:
 8. **Responsible AI** – Usage policies, moderation, refusal behavior, evaluation of answer quality.
 
 ## Testing
-Run the fast unit tests with:
+Run the fast unit tests from the repo root with:
 ```bash
-pytest
+python -m pytest
 ```
 Tests cover core utilities (chunking and vector-store retrieval). Expand them as the project grows.
 
