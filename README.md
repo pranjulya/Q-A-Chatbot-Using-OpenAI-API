@@ -13,7 +13,7 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
 ## Quick Start
 1. **Clone and install dependencies**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/pranjulya/Q-A-Chatbot-Using-OpenAI-API.git
    cd Q-A-Chatbot-Using-OpenAI-API
    python -m venv .venv
    source .venv/bin/activate
@@ -99,4 +99,3 @@ Released under the MIT License. See `LICENSE` for details.
 - [OpenAI Cookbook](https://github.com/openai/openai-cookbook)
 - [Streamlit Documentation](https://docs.streamlit.io/)
 - [Typer Documentation](https://typer.tiangolo.com/)
-- [Core Documentation](https://openai.com)
