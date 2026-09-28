@@ -1,8 +1,15 @@
 """CLI for ingesting documents into the local vector store."""
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
+
+# Allow running this file directly (e.g. `python scripts/ingest.py run data/raw`) from any directory:
+# put the repo root on sys.path so the sibling packages import cleanly.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import typer
 from dotenv import load_dotenv
@@ -15,11 +22,23 @@ from retrieval.store import LocalVectorStore
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
+@app.callback()
+def main() -> None:
+    """Ingest documents into the local vector store (use the `run` command)."""
+    # Having a callback keeps `run` as an explicit subcommand, matching the README
+    # (`python -m scripts.ingest run data/raw ...`). Without it Typer collapses a
+    # single command and treats "run" as the input directory.
+
+
 @app.command()
 def run(
     input_dir: Path = typer.Argument(..., help="Directory containing source documents."),
     output_path: Path = typer.Option(
-        Path("data/processed/index.json"), help="Path to write the vector store JSON file."
+        Path("data/processed/index.json"),
+        "--output",
+        "--output-path",
+        "-o",
+        help="Path to write the vector store JSON file.",
     ),
     embedding_model: str = typer.Option(
         "text-embedding-3-small", help="OpenAI embedding model to use."

@@ -1,9 +1,16 @@
 """Streamlit interface for the Q&A chatbot."""
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 from typing import List, Optional
+
+# Allow running this file directly (e.g. `streamlit run app/main.py`) from any directory:
+# put the repo root on sys.path so the sibling packages import cleanly.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import streamlit as st
 from dotenv import load_dotenv

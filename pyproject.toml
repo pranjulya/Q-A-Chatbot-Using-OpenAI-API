@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qa-chatbot-openai"
+version = "0.1.0"
+description = "Retrieval-augmented Q&A chatbot over your own documents (OpenAI embeddings, Streamlit UI, Typer CLI)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+# Keep in sync with requirements.txt
+dependencies = [
+  "openai>=1.12.0",
+  "python-dotenv>=1.0.0",
+  "typer>=0.9.0,<1.0.0",
+  "streamlit>=1.33.0",
+  "pdfplumber>=0.10.0",
+  "python-docx>=0.8.11",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.4.0"]
+
+[project.scripts]
+qa-ingest = "scripts.ingest:app"
+
+[tool.setuptools]
+# Flat layout: these top-level folders are the importable packages.
+packages = ["app", "ingestion", "llm", "retrieval", "scripts"]
+
+[tool.pytest.ini_options]
+# Put the repo root on sys.path so `pytest` (not only `python -m pytest`)
+# can import ingestion/, retrieval/, llm/ without installing the project.
+pythonpath = ["."]
+testpaths = ["tests"]

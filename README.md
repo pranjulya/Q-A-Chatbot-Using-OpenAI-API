@@ -18,6 +18,7 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
    python -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
+   # optional: pip install -e ".[test]"  (installs the packages + a `qa-ingest` command)
    ```
 2. **Configure environment variables**
    ```bash
@@ -28,12 +29,12 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
    ```bash
    mkdir -p data/raw
    # add .txt/.md/.pdf/.docx files to data/raw
-   # Run from the repo root so local packages import cleanly
    python -m scripts.ingest run data/raw --output data/processed/index.json
+   # equivalent: python scripts/ingest.py run data/raw --output data/processed/index.json
    ```
 4. **Launch the Streamlit app**
    ```bash
-   PYTHONPATH=. python -m streamlit run app/main.py
+   streamlit run app/main.py
    ```
 
 ## Usage
@@ -63,11 +64,13 @@ An open-source, retrieval-augmented Q&A chatbot that grounds answers in your own
 │   └── ingest.py
 ├── tests/                 # Pytest-based smoke tests
 │   ├── test_chunker.py
+│   ├── test_ingest_cli.py
 │   └── test_store.py
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE (MIT)
 ├── README.md
+├── pyproject.toml         # packaging + pytest config (pythonpath = ["."])
 └── requirements.txt
 ```
 
@@ -86,9 +89,9 @@ The repository doubles as a companion curriculum. Suggested topics for students:
 ## Testing
 Run the fast unit tests from the repo root with:
 ```bash
-python -m pytest
+pytest            # or: python -m pytest
 ```
-Tests cover core utilities (chunking and vector-store retrieval). Expand them as the project grows.
+`pyproject.toml` puts the repo root on the import path for pytest, so no `PYTHONPATH` is needed. Tests cover core utilities (chunking, vector-store retrieval) and the ingest CLI (with a fake embedder, so no API key or network is needed). Expand them as the project grows.
 
 ## Contributing
 Contributions from students and educators are welcome! Please read `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` before opening an issue or pull request.
