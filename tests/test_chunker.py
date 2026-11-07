@@ -19,3 +19,21 @@ def test_chunk_text_validates_overlap():
         assert "overlap" in str(exc)
     else:  # pragma: no cover
         raise AssertionError("chunk_text should have raised ValueError")
+
+
+def test_chunk_text_rejects_negative_overlap():
+    try:
+        chunk_text("hello world again", chunk_size=10, overlap=-1)
+    except ValueError as exc:
+        assert "overlap" in str(exc).lower()
+    else:  # pragma: no cover
+        raise AssertionError("chunk_text should have raised ValueError for negative overlap")
+
+
+def test_chunk_text_allows_zero_overlap_without_skipping_words():
+    text = " ".join([f"w{i}" for i in range(25)])
+    chunks = chunk_text(text, chunk_size=10, overlap=0)
+    covered = set()
+    for chunk in chunks:
+        covered.update(chunk.split())
+    assert covered == set(f"w{i}" for i in range(25))
